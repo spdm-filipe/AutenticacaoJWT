@@ -30,12 +30,18 @@ namespace AutenticacaoJWT
 
             );
 
-            builder.Services.AddSession(options =>
+            builder.Services.AddAuthorization(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
+                options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Admin"));
             });
+
+
+            //builder.Services.AddSession(options =>
+            //{
+            //    options.IdleTimeout = TimeSpan.FromMinutes(30);
+            //    options.Cookie.HttpOnly = true;
+            //    options.Cookie.IsEssential = true;
+            //});
 
             var app = builder.Build();
 
@@ -50,7 +56,7 @@ namespace AutenticacaoJWT
             app.UseAuthentication();    
             app.UseAuthorization();
 
-            app.UseSession();
+            //app.UseSession();
             app.MapControllers();
 
             app.Run();
