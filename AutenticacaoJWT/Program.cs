@@ -15,11 +15,27 @@ namespace AutenticacaoJWT
             builder.Services.AddSwaggerGen();
 
 
-                
+            var secretKey = builder.Configuration["SecretKey"];    
             builder.Services.AddAuthentication().AddJwtBearer(options => 
-            
-            
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(secretKey??string.Empty)),
+                ClockSkew = TimeSpan.Zero
+            }
+
             );
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             var app = builder.Build();
 
@@ -34,7 +50,7 @@ namespace AutenticacaoJWT
             app.UseAuthentication();    
             app.UseAuthorization();
 
-
+            app.UseSession();
             app.MapControllers();
 
             app.Run();
